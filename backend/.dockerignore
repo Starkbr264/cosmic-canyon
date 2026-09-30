@@ -1,0 +1,16 @@
+# `target/` tem o build da maquina (Windows) e pode ser maior que o codigo-fonte;
+# a imagem compila do zero, entao copiar isso so aumenta o contexto e arrisca
+# varrer classes compiladas para o jar final.
+target
+*.jar
+*.war
+
+.git
+.gitignore
+
+.env
+.env.*
+!.env.example
+
+*.log
+*.md

@@ -1,0 +1,20 @@
+# Sem isto, o `COPY . .` traz o node_modules instalado no Windows por cima do
+# que o `npm ci` da imagem de deps instalou. O resultado e um build que quebra
+# com "node.exe: not found": o shim do .bin aponta para o executavel do host.
+node_modules
+.next
+out
+npm-debug.log*
+Dockerfile
+.dockerignore
+
+# Configuracao local nunca entra na imagem: NEXT_PUBLIC_* vem de build arg.
+.env
+.env.*
+!.env.example
+
+# Ruido que nao muda o bundle.
+.git
+.gitignore
+README.md
+*.md

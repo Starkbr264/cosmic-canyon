@@ -1,0 +1,25 @@
+# Normaliza fim de linha para evitar o classico
+# "bad interpreter: /bin/sh^M" no CI Linux, que roda ./mvnw.
+# O Maven Wrapper e um shell script e precisa de LF, independente do
+# core.autocrlf de cada maquina.
+
+* text=auto
+
+# Wrapper do Maven: LF e precisa ser executavel
+backend/mvnw        text eol=lf
+backend/.mvn/**     text eol=lf
+
+# Scripts de shell
+*.sh                text eol=lf
+
+# Batch/PowerShell: Windows-only, CRLF e o native
+*.cmd               text eol=crlf
+*.bat               text eol=crlf
+*.ps1               text eol=crlf
+
+# Binarios que nao devem ser tocados
+*.jar               binary
+*.png               binary
+*.jpg               binary
+*.ico               binary
+package-lock.json   text eol=lf

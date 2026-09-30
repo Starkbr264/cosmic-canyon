@@ -1,0 +1,11 @@
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    # uid fixo: o dashboard referencia ${datasource} e precisa casar com este.
+    uid: tradewind-prometheus
+    url: http://prometheus:9090
+    isDefault: true
+    editable: false

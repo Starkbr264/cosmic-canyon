@@ -1,0 +1,38 @@
+# Perfil `test`: H2 em memoria, para testes de contexto completo sem Docker.
+#
+# ATENCAO - por que o Flyway esta desligado aqui:
+# a V1 cria `CREATE INDEX ... WHERE active = TRUE` (indice parcial), e o H2
+# nao suporta indice filtrado. Rodar o Flyway aqui falharia. Como este perfil
+# existe so para o smoke test de contexto, o schema vem do Hibernate.
+#
+# Isso NAO afeta dev nem producao: `ddl-auto` continua `none` everywhere else,
+# e quem manda no schema real e o Flyway (ver V1/V2). O schema gerado aqui
+# tambem nao substitui o ProductRepositoryIT, que valida contra Postgres real.
+#
+# Quem valida o schema de verdade: ProductRepositoryIT (Testcontainers ou o
+# Postgres do compose via -Dit.jdbc.url).
+spring:
+  config:
+    activate:
+      on-profile: test
+
+  datasource:
+    url: jdbc:h2:mem:tradewind-test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.H2Dialect
+    open-in-view: false
+
+  flyway:
+    enabled: false
+
+logging:
+  level:
+    root: WARN
+    br.com.tradewind: INFO
+    org.springframework.test: WARN

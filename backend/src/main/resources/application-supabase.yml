@@ -1,0 +1,40 @@
+# Perfil `supabase`: mesmo schema, outra infra.
+#
+# Connection string em Supabase -> Project Settings -> Database -> Connection string
+# (modo "Session", porta 5432). sslmode=require e obrigatorio no Supabase.
+#
+#   $env:SPRING_PROFILES_ACTIVE="supabase"
+#   $env:SUPABASE_DB_URL="jdbc:postgresql://db.<ref>.supabase.co:5432/postgres?sslmode=require"
+#   $env:SUPABASE_DB_USER="postgres"
+#   $env:SUPABASE_DB_PASSWORD="<senha do banco>"
+#
+# As migrations do Flyway rodam normalmente; o `postgres` do Supabase exige
+# senha do banco (nao a do dashboard) - defina-a em Database -> Settings.
+spring:
+  config:
+    activate:
+      on-profile: supabase
+  datasource:
+    url: ${SUPABASE_DB_URL}
+    username: ${SUPABASE_DB_USER:postgres}
+    password: ${SUPABASE_DB_PASSWORD}
+    hikari:
+      pool-name: tradewind-supabase
+      maximum-pool-size: 10
+      minimum-idle: 1
+      connection-timeout: 30000
+
+# O pool gerenciado do Supabase tem conexoes limitadas pelo plano: nao ultrapasse o max.
+#
+# `SUPABASE_REST_ENABLED=true` liga o SupabaseRestClient (PostgREST). Mantenha
+# desligado se voce nao for usar esse client, para nao exigir SUPABASE_URL.
+app:
+  supabase:
+    enabled: ${SUPABASE_REST_ENABLED:false}
+    url: ${SUPABASE_URL:}
+    anon-key: ${SUPABASE_ANON_KEY:}
+
+logging:
+  level:
+    br.com.tradewind: DEBUG
+    org.hibernate.SQL: WARN

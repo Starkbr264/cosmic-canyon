@@ -1,0 +1,190 @@
+{
+  "name": "API Tradewind",
+  "_postman_id": "b0f0a3c2-7d41-4a19-9c55-tradewind00001",
+  "description": "Colecao gerada a partir do contrato OpenAPI da API. Importe o arquivo `openapi.json` desta pasta para manter a colecao sincronizada, ou use estes requests como base.",
+  "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+  "info": {
+    "name": "API Tradewind",
+    "description": "Catalogo de produtos - Spring Boot 3.5 + Supabase/Postgres.\n\nAtualizada junto com a API: o CI regenera `openapi.json` e a colecao a cada build.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "b0f0a3c2-7d41-4a19-9c55-tradewind00001"
+  },
+  "item": [
+    {
+      "name": "Produtos",
+      "item": [
+        {
+          "name": "Listar produtos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/products?page={{page}}&size={{size}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "products"],
+              "query": [
+                { "key": "term", "value": "", "description": "Busca por nome ou sku", "disabled": true },
+                { "key": "active", "value": "true", "description": "Filtra por disponibilidade", "disabled": true },
+                { "key": "minPrice", "value": "0", "description": "Preco minimo", "disabled": true },
+                { "key": "page", "value": "{{page}}", "description": "Pagina (base 0)" },
+                { "key": "size", "value": "{{size}}", "description": "Itens por pagina (max 100)" }
+              ]
+            },
+            "description": "Pagina de produtos. Todos os filtros sao opcionais e se combinam."
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar por SKU",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/products/by-sku/{{sku}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "products", "by-sku", "{{sku}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/products/{{productId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "products", "{{productId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Criar produto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('retorna 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('devolve Location', function () {",
+                  "    pm.expect(pm.response.headers.get('Location')).to.be.a('string');",
+                  "});",
+                  "",
+                  "// Guarda o id criado para os proximos requests",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('productId', body.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sku\": \"{{$randomSku}}\",\n  \"name\": \"Produto de teste\",\n  \"description\": \"Criado via Postman\",\n  \"price\": 49.90,\n  \"active\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "products"]
+            },
+            "description": "Cria um produto. Retorna 409 se o SKU ja existir."
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar produto",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sku\": \"SKU-001\",\n  \"name\": \"Produto atualizado\",\n  \"description\": \"Editado via Postman\",\n  \"price\": 59.90,\n  \"active\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/products/{{productId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "products", "{{productId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Remover produto",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/products/{{productId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "products", "{{productId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('banco no ar', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(pm.response.json().status).to.eql('UP');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/actuator/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["actuator", "health"]
+            },
+            "description": "Verifica a API e o banco. Use antes de rodar a suite."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Documentacao",
+      "item": [
+        {
+          "name": "OpenAPI (JSON)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v3/api-docs",
+              "host": ["{{baseUrl}}"],
+              "path": ["v3", "api-docs"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "productId", "value": "" },
+    { "key": "sku", "value": "SKU-001" }
+  ]
+}

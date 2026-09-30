@@ -1,0 +1,43 @@
+# ===== Java / Maven =====
+target/
+*.jar
+*.war
+*.class
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# ===== Node / Next.js =====
+node_modules/
+.next/
+out/
+build/
+dist/
+.vercel
+*.tsbuildinfo
+next-env.d.ts
+
+# ===== Ferramentas locais =====
+.tools/
+
+# ===== Segredos =====
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# ===== Logs =====
+*.log
+npm-debug.log*
+logs/
+
+# ===== IDE =====
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.classpath
+.project
+.settings/
+nbproject/private/

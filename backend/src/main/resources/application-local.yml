@@ -1,0 +1,15 @@
+# Perfil local: Postgres do Docker Compose (docker-compose.yml -> serviço `postgres`).
+# Ativado por padrão em dev; em CI/containers use `SPRING_PROFILES_ACTIVE=local` explicito.
+spring:
+  config:
+    activate:
+      on-profile: local
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:tradewind}
+    username: ${POSTGRES_USER:tradewind}
+    password: ${POSTGRES_PASSWORD:tradewind_dev}
+    hikari:
+      pool-name: tradewind-pool
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000

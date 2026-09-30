@@ -1,0 +1,121 @@
+server:
+  port: ${API_PORT:8080}
+  error:
+    include-message: always
+  shutdown: graceful
+
+spring:
+  application:
+    name: tradewind-backend
+
+  # Sem perfil explicito, assume `local` (Postgres do Docker Compose).
+  # Sem isso, rodar pela IDE sem configurar nada quebra com
+  # "Failed to determine a suitable driver class": o perfil `default` nao tem
+  # datasource, ele so existe no application-local.yml.
+  profiles:
+    default: local
+
+  # Le o .env da raiz do projeto como se fosse um .properties, para o Spring
+  # enxergar as mesmas variaveis que o Docker Compose usa. Sem isso, rodar pela
+  # IDE sem configurar nada cai em POSTGRES_PORT=5432 - a porta de outro
+  # projeto da maquina, nao deste.
+  #
+  # O caminho e relativo ao diretorio de trabalho (o `backend/` na IDE). No
+  # container o arquivo nao existe, e o `optional:` faz o app seguir so com as
+  # variaveis de ambiente - que tem precedencia sobre este import.
+  config:
+    import: "optional:file:../.env[.properties]"
+
+  # O schema e sempre do Flyway. Nunca habilite ddl-auto: ele quebraria o
+  # ambiente do Supabase e criaria divergencia entre dev e producao.
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc.time_zone: UTC
+        format_sql: false
+    show-sql: false
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    validate-on-migrate: true
+
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      write-dates-as-timestamps: false
+
+  mvc:
+    problemdetails:
+      enabled: true
+
+# ===== Documentacao =====
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: alpha
+    tags-sorter: alpha
+    display-request-duration: true
+    doc-expansion: none
+  default-produces-media-type: application/json
+
+# ===== Atores de saude (deploy / orquestrador) =====
+# `prometheus` aparece no include de proposito: e o que o infra/observability
+# raspa. `info` expoe build/commit em /actuator/info, util para confirmar qual
+# versao esta no ar depois de um deploy.
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: when-authorized
+  health:
+    db:
+      enabled: true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  info:
+    env:
+      # Sem isto o /actuator/info vem como {}: nenhuma fonte de info e lida.
+      enabled: true
+
+info:
+  app:
+    name: tradewind-backend
+  # `build.version` e `git.commit` sao sobrescritos pelo build-info.properties
+  # gerado pelo spring-boot-maven-plugin; estas chaves sao o fallback para quem
+  # roda pela IDE, onde o plugin nao passa.
+  build:
+    version: ${APP_VERSION:dev}
+  git:
+    commit: ${GIT_COMMIT:}
+
+# ===== Variaveis da aplicacao =====
+app:
+  cors:
+    allowed-origins: ${API_CORS_ALLOWED_ORIGINS:http://localhost:3000,http://127.0.0.1:3000}
+  openapi:
+    dev-server-url: ${API_PUBLIC_URL:http://localhost:8080}
+  supabase:
+    enabled: false
+    url: ${SUPABASE_URL:}
+    anon-key: ${SUPABASE_ANON_KEY:}
+
+logging:
+  level:
+    root: INFO
+    br.com.tradewind: DEBUG
+    org.flywaydb: INFO
