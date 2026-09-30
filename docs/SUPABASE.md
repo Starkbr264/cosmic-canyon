@@ -60,7 +60,7 @@ order by installed_rank;
 | Variavel             | Obrigatoria | Origem                                  |
 | -------------------- | ----------- | --------------------------------------- |
 | `SUPABASE_DB_URL`    | sim         | Connection string (modo Session)        |
-| `SUPABASE_DB_USER`   | nao         | PadrÃ£o: `postgres`                      |
+| `SUPABASE_DB_USER`   | nao         | Padrão: `postgres`                      |
 | `SUPABASE_DB_PASSWORD` | sim       | Senha do banco                          |
 | `SUPABASE_URL`       | nao         | Project URL (so para o client PostgREST)|
 | `SUPABASE_ANON_KEY`  | nao         | Project API → anon public key           |
@@ -95,7 +95,7 @@ Com o perfil `supabase` ativo e essas variaveis setadas, o bean sobe. Sem elas, 
 
 ## 6. RLS (Row Level Security)
 
-O Supabase liga RLS por padrÃ£o nas tabelas criadas pelo dashboard. A tabela criada pelo nosso Flyway **nao** fica com RLS ativo, entao:
+O Supabase liga RLS por padrão nas tabelas criadas pelo dashboard. A tabela criada pelo nosso Flyway **nao** fica com RLS ativo, entao:
 
 - A API (que conecta como `postgres`) enxerga tudo normalmente.
 - Se voce habilitar RLS para expor a tabela via PostgREST, o frontend so vera as linhas permitidas - o que muda o comportamento da listagem.
@@ -103,7 +103,7 @@ O Supabase liga RLS por padrÃ£o nas tabelas criadas pelo dashboard. A tabela c
 Decida isso explicitamente antes de publicar:
 
 ```sql
--- deixar bloqueado (padrÃ£o seguro)
+-- deixar bloqueado (padrão seguro)
 alter table products enable row level security;
 
 -- leitura publica (so faz sentido para catalogo)

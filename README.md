@@ -88,7 +88,7 @@ para não colidir com outros projetos que já ocupam 5432/8080 na máquina.
 | Checkout | http://localhost:3000/checkout |
 | Painel | http://localhost:3000/painel |
 | Postgres (Docker) | localhost:5433 (user `tradewind`) |
-| pgAdmin | http://localhost:5051 (admin@tradewind.local) |
+| pgAdmin | http://localhost:5051 (admin@tradewind.dev) |
 
 ## Como o pagamento simulado funciona
 

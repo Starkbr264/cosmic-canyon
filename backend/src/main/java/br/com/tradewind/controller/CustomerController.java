@@ -38,7 +38,7 @@ public class CustomerController {
 
     @PostMapping
     @Operation(summary = "Cadastra cliente",
-            description = "Coleta minima: e-mail, nome, locale e pais. Consentimento de marketing e falso por tradewind.")
+            description = "Coleta minima: e-mail, nome, locale e pais. Consentimento de marketing e falso por padrao.")
     public ResponseEntity<CustomerRequest.CustomerView> create(
             @Valid @RequestBody CustomerRequest request,
             UriComponentsBuilder uriBuilder) {

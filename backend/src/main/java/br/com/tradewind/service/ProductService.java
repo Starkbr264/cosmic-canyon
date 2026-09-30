@@ -45,7 +45,7 @@ public class ProductService {
     }
 
     /**
-     * Normaliza o termo em um tradewind {@code LIKE} seguro.
+     * Normaliza o termo em um padrão {@code LIKE} seguro.
      *
      * <p>Escapa {@code %} e {@code _} para que o usuario nao consiga injetar
      * coringa, e normaliza para minusculo porque a coluna e comparada com
@@ -83,8 +83,25 @@ public class ProductService {
         return repository.save(product);
     }
 
+    /**
+     * Apaga o produto so quando ninguem o referencia.
+     *
+     * <p>Estoque e item de pedido sao as duas tabelas que seguram o produto.
+     * Sem esta checagem o banco levanta
+     * {@code violates foreign key constraint "inventory_product_id_fkey"} e o
+     * cliente recebe 500 - que e mentira: o banco esta integro, a operacao e
+     * que viola regra de negocio. E uma decisao de negocio, nao um erro de
+     * servidor, entao vira 409 com o caminho alternativo (desativar).
+     */
     public void delete(UUID id) {
         Product product = findById(id);
+
+        long inventoryRows = repository.countInventoryRows(id);
+        long orderItemRows = repository.countOrderItemRows(id);
+        if (inventoryRows > 0 || orderItemRows > 0) {
+            throw ConflictException.productHasReferences(product.getSku(), inventoryRows, orderItemRows);
+        }
+
         repository.delete(product);
     }
 

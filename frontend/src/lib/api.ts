@@ -40,15 +40,44 @@ export interface ApiProblem {
   fields?: Record<string, string>;
 }
 
+/**
+ * Erro com o status HTTP anexado.
+ *
+ * <p>Existe porque a tela precisa distinguir 409 (regra de negocio, o usuario
+ * pediu algo legitimo que nao cabe) de 400/500 (algo errado na chamada). Sem o
+ * status, tudo vira a mesma caixa vermelha e o usuario acha que o servidor
+ * quebrou.
+ */
+export class ApiError extends Error {
+  readonly status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+  }
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_URL}${path}`, {
-    ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...init?.headers,
-    },
-    cache: "no-store",
-  });
+  // Falha de rede e falha HTTP sao coisas diferentes. Sem este try/catch o
+  // navegador devolve "Failed to fetch" sem dizer se a API esta no ar, e o
+  // unico sintoma na tela e uma lista vazia.
+  let response: Response;
+  try {
+    response = await fetch(`${API_URL}${path}`, {
+      ...init,
+      headers: {
+        "Content-Type": "application/json",
+        ...init?.headers,
+      },
+      cache: "no-store",
+    });
+  } catch {
+    throw new Error(
+      `Nao foi possivel falar com a API em ${API_URL}. Ela esta no ar? ` +
+        `Se estiver em containers, suba com: docker compose --profile app up -d`,
+    );
+  }
 
   if (!response.ok) {
     let problem: ApiProblem = {
@@ -60,13 +89,12 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     } catch {
       // corpo nao-JSON: mantem o titulo padrão
     }
-    throw new Error(
-      problem.fields
-        ? `${problem.title}: ${Object.entries(problem.fields)
-            .map(([field, msg]) => `${field} ${msg}`)
-            .join("; ")}`
-        : (problem.detail ?? problem.title)
-    );
+    const message = problem.fields
+      ? `${problem.title}: ${Object.entries(problem.fields)
+          .map(([field, msg]) => `${field} ${msg}`)
+          .join("; ")}`
+      : (problem.detail ?? problem.title);
+    throw new ApiError(message, response.status);
   }
 
   return response.json() as Promise<T>;

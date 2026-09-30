@@ -89,13 +89,13 @@ Com o frontend na Vercel e a API em outro dominio, o navegador faz requisicao cr
 
 ### Previews da Vercel
 
-Cada preview gera um dominio proprio (`tradewind-frontend-abc123.vercel.app`). Para a API aceitar os previews, libere o padrÃ£o em dev, nunca em producao:
+Cada preview gera um dominio proprio (`tradewind-frontend-abc123.vercel.app`). Para a API aceitar os previews, libere o padrão em dev, nunca em producao:
 
 ```
 API_CORS_ALLOWED_ORIGINS=https://seu-app.vercel.app,https://tradewind-frontend-*.vercel.app
 ```
 
-O `*` em `allowedOrigins` do Spring so aceita um unico `*`, e ele conflita com `allowCredentials(true)`. O padrÃ£o com wildcard no meio **nao** e suportado pelo Spring - use uma lista explicita ou um proxy.
+O `*` em `allowedOrigins` do Spring so aceita um unico `*`, e ele conflita com `allowCredentials(true)`. O padrão com wildcard no meio **nao** e suportado pelo Spring - use uma lista explicita ou um proxy.
 
 ---
 

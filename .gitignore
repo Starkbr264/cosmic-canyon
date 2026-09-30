@@ -41,3 +41,6 @@ logs/
 .project
 .settings/
 nbproject/private/
+
+# ===== Ferramentas de agente =====
+.opencode/

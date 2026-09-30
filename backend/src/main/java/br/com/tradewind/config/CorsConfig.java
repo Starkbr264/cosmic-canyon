@@ -12,7 +12,7 @@ import java.util.List;
  * CORS liberado para o frontend Next.js.
  *
  * <p>Em producao a lista vem de {@code API_CORS_ALLOWED_ORIGINS}; localmente
- * o tradewind e o dev server do Next.js.
+ * o padrao e o dev server do Next.js.
  */
 @Configuration
 public class CorsConfig implements WebMvcConfigurer {

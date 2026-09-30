@@ -168,6 +168,27 @@ tbody tr:last-child td {
   font-size: 0.9rem;
 }
 
+/* Recusa de regra de negocio: a operacao foi barrada, nao quebrou.
+   Mesma forma do .error, tom neutro em vez de vermelho de falha. */
+.notice {
+  background: #1f2028;
+  border: 1px solid #3a3d4a;
+  color: #d8dbe4;
+  padding: 0.7rem 0.9rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+/* Botoes da acao por linha. Inline-block para nao esticar a coluna
+   quando a tabela cresce; flex aqui faria o botao esticar com a coluna. */
+.row-actions {
+  display: inline-flex;
+  gap: 0.4rem;
+  justify-content: flex-end;
+  white-space: nowrap;
+}
+
 .muted {
   color: var(--muted);
 }

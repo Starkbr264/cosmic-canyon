@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   API_URL,
+  ApiError,
   formatBRL,
   productsApi,
   type Product,
@@ -14,6 +15,9 @@ export default function Home() {
   const [onlyActive, setOnlyActive] = useState(false);
   const [total, setTotal] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  // Dois canais separados: erro e recusa de regra de negocio. Misturar os dois
+  // fazia o 409 parecer defeito.
+  const [notice, setNotice] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -70,11 +74,41 @@ export default function Home() {
 
   async function remove(id: string) {
     setError(null);
+    setNotice(null);
     try {
       await productsApi.remove(id);
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao remover");
+      // 409 e a resposta esperada quando o produto tem estoque ou pedidos. A
+      // mensagem da API ja diz o que fazer, entao o erro nao e tratado como
+      // falha generica.
+      if (err instanceof ApiError && err.status === 409) {
+        setNotice(err.message);
+      } else {
+        setError(err instanceof Error ? err.message : "Falha ao remover");
+      }
+    }
+  }
+
+  // Desativar e o caminho que a API sugere no 409. Vai por PUT porque nao ha
+  // rota de patch: o payload do PUT exige todos os campos, e o produto da tela
+  // ja tem todos.
+  async function toggleActive(p: Product) {
+    setError(null);
+    setNotice(null);
+    try {
+      await productsApi.update(p.id, {
+        sku: p.sku,
+        name: p.name,
+        description: p.description,
+        price: p.price,
+        active: !p.active,
+      });
+      await load();
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Falha ao alterar a situacao",
+      );
     }
   }
 
@@ -84,7 +118,7 @@ export default function Home() {
         <div>
           <h1>Catalogo de Produtos</h1>
           <p className="subtitle">
-            Next.js na Vercel &middot; Spring Boot + Postgres &middot;{" "}
+            Next.js self-hosted &middot; Spring Boot + Postgres &middot;{" "}
             <code>{API_URL}</code>
           </p>
         </div>
@@ -102,6 +136,7 @@ export default function Home() {
       </header>
 
       {error && <div className="error">{error}</div>}
+      {notice && <div className="notice">{notice}</div>}
 
       <section className="panel">
         <div className="filters">
@@ -165,9 +200,17 @@ export default function Home() {
                   </span>
                 </td>
                 <td style={{ textAlign: "right" }}>
-                  <button className="danger" onClick={() => remove(p.id)}>
-                    Remover
-                  </button>
+                  <div className="row-actions">
+                    <button
+                      className="ghost"
+                      onClick={() => toggleActive(p)}
+                    >
+                      {p.active ? "Desativar" : "Ativar"}
+                    </button>
+                    <button className="danger" onClick={() => remove(p.id)}>
+                      Remover
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}

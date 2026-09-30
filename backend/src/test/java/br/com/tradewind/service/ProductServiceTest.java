@@ -197,14 +197,63 @@ class ProductServiceTest {
     class Delete {
 
         @Test
-        @DisplayName("remove o produto existente")
+        @DisplayName("remove o produto existente quando ninguem o referencia")
         void deveRemover() {
             UUID id = UUID.randomUUID();
             when(repository.findById(id)).thenReturn(Optional.of(existingProduct(id)));
+            when(repository.countInventoryRows(id)).thenReturn(0L);
+            when(repository.countOrderItemRows(id)).thenReturn(0L);
 
             service.delete(id);
 
             verify(repository).delete(any(Product.class));
+        }
+
+        @Test
+        @DisplayName("recusa com conflito quando o produto tem estoque")
+        void naoDeveRemoverComEstoque() {
+            UUID id = UUID.randomUUID();
+            when(repository.findById(id)).thenReturn(Optional.of(existingProduct(id)));
+            when(repository.countInventoryRows(id)).thenReturn(2L);
+            when(repository.countOrderItemRows(id)).thenReturn(0L);
+
+            assertThatThrownBy(() -> service.delete(id))
+                    .isInstanceOf(ConflictException.class)
+                    .hasMessageContaining("2 linhas de estoque")
+                    .hasMessageContaining("Desative-o");
+
+            verify(repository, never()).delete(any(Product.class));
+        }
+
+        @Test
+        @DisplayName("recusa com conflito quando o produto ja foi vendido")
+        void naoDeveRemoverComPedido() {
+            UUID id = UUID.randomUUID();
+            when(repository.findById(id)).thenReturn(Optional.of(existingProduct(id)));
+            when(repository.countInventoryRows(id)).thenReturn(0L);
+            when(repository.countOrderItemRows(id)).thenReturn(3L);
+
+            assertThatThrownBy(() -> service.delete(id))
+                    .isInstanceOf(ConflictException.class)
+                    .hasMessageContaining("3 itens de pedido");
+
+            verify(repository, never()).delete(any(Product.class));
+        }
+
+        @Test
+        @DisplayName("recusa com conflito quando tem estoque e pedido juntos")
+        void naoDeveRemoverComEstoqueEPedido() {
+            UUID id = UUID.randomUUID();
+            when(repository.findById(id)).thenReturn(Optional.of(existingProduct(id)));
+            when(repository.countInventoryRows(id)).thenReturn(1L);
+            when(repository.countOrderItemRows(id)).thenReturn(1L);
+
+            assertThatThrownBy(() -> service.delete(id))
+                    .isInstanceOf(ConflictException.class)
+                    .hasMessageContaining("1 linha de estoque")
+                    .hasMessageContaining("1 item de pedido");
+
+            verify(repository, never()).delete(any(Product.class));
         }
 
         @Test
@@ -237,7 +286,7 @@ class ProductServiceTest {
         }
 
         @Test
-        @DisplayName("monta o padrÃ£o LIKE em minÃºsculo e com curingas escapados")
+        @DisplayName("monta o padrão LIKE em minúsculo e com curingas escapados")
         void deveMontarLikeComCuringasEscapados() {
             when(repository.search(any(), any(), any(), any()))
                     .thenReturn(new org.springframework.data.domain.PageImpl<>(List.of()));

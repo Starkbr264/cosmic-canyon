@@ -25,10 +25,10 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
      * Filtro combinado. O parametro {@code pattern} ja vem pronto da camada de
      * servico ({@code %termo%} em minusculo).
      *
-     * <p>Motivo: montar o padrÃ£o com {@code concat('%', :termo, '%')} dentro do
+     * <p>Motivo: montar o padrão com {@code concat('%', :termo, '%')} dentro do
      * JPQL deixa o bind sem tipo definido, e o Postgres resolve a concatenacao
      * como {@code bytea}, estourando em {@code function lower(bytea) does not
-     * exist}. Com o tradewind pronto, o bind e um VARCHAR e a query funciona.
+     * exist}. Com o padrão pronto, o bind e um VARCHAR e a query funciona.
      *
      * <p>A ordenacao fica a cargo do {@link Pageable}, por isso nao ha
      * {@code order by} aqui (duplicaria com o sort do pageavel).
@@ -47,4 +47,24 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
             @Param("minPrice") BigDecimal minPrice,
             Pageable pageable
     );
+
+    /**
+     * Quantas linhas de {@code inventory} apontam para o produto.
+     *
+     * <p>Existe para o {@code DELETE} descobrir o motivo de um possivel conflito
+     * antes de tentar apagar. Sem isso o banco responde
+     * {@code violates foreign key constraint} e a excecao chega crua no
+     * cliente como 500 - erro de servidor para algo que e decisao de negocio.
+     */
+    @Query("select count(i) from Inventory i where i.product.id = :productId")
+    long countInventoryRows(@Param("productId") UUID productId);
+
+    /**
+     * Quantos itens de pedido apontam para o produto.
+     *
+     * <p>Pedido e registro contabil: LGPD e GDPR mandam preservar o historico
+     * financeiro, entao produto que ja foi vendido nao pode sumir do banco.
+     */
+    @Query("select count(oi) from OrderItem oi where oi.product.id = :productId")
+    long countOrderItemRows(@Param("productId") UUID productId);
 }

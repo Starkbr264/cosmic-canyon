@@ -124,10 +124,15 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Remove produto")
+    @Operation(
+            summary = "Remove produto",
+            description = "Remove de verdade so se o produto nao tiver estoque nem itens de pedido. "
+                    + "Com referencia, responde 409 e o caminho e desativar (active=false)."
+    )
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Produto removido"),
-            @ApiResponse(responseCode = "404", description = "Produto inexistente")
+            @ApiResponse(responseCode = "404", description = "Produto inexistente"),
+            @ApiResponse(responseCode = "409", description = "Produto tem estoque ou itens de pedido: desative em vez de remover")
     })
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         service.delete(id);

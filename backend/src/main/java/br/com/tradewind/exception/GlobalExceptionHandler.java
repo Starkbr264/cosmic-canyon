@@ -18,7 +18,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Erros no tradewind RFC 9457 (Problem Details), que e o que o Swagger UI e o
+ * Erros no padrão RFC 9457 (Problem Details), que e o que o Swagger UI e o
  * Postman esperam para exibir falhas de forma legivel.
  *
  * <p>A ordem e explicita de proposito: o {@code ProblemDetailsExceptionHandler}

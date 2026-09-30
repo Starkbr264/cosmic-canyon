@@ -239,9 +239,12 @@ services:
     restart: unless-stopped
     logging: *logging
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@tradewind.local}
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@tradewind.dev}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-tradewind_dev}
-      PGADMIN_CONFIG_SERVER_MODE: False
+      # Aspas sao obrigatorias. Sem elas o Compose converte para a string
+      # "false", e o pgAdmin avalia o valor como Python: NameError: name
+      # 'false' is not defined. Ele espera o literal Python "True"/"False".
+      PGADMIN_CONFIG_SERVER_MODE: "False"
     ports:
       - "${PGADMIN_PORT:-5051}:80"
     volumes:
