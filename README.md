@@ -220,3 +220,6 @@ compose. O CI em Linux não sofre disso.
 ├── docker-compose.yml       stack por perfil: postgres, api, web, redis, objectstore, obs
 └── .github/workflows/       CI de build, teste e geração de contrato
 ```
+
+
+OBS: Projeto Inteiramente de teste 
